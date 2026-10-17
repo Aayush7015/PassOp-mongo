@@ -1,209 +1,36 @@
-import React  from 'react'
-import { useRef,useState,useEffect } from 'react'
-import { ToastContainer, toast } from "react-toastify";
+import { useEffect, useMemo, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { v4 as uuidv4 } from 'uuid';
-const Manager = () => {
-    const ref = useRef()
-    const passwordRef = useRef()
-    const [form, setform] = useState({site:"", username: "",password:""})
-    const [passwordArray, setPasswordArray] = useState([])
+import { api } from "../api";
+import EyeToggle from "./EyeToggle";
+import copyIcon from "../assets/copy-icon.svg";
+import editIcon from "../assets/edit-pen-icon.svg";
+import deleteIcon from "../assets/delete-icon.svg";
 
-     const  getpassword = async () => {
-        let req = await fetch("http://localhost:3000")
-       let passwords = await req.json();
-        console.log( passwords);
-          setPasswordArray(passwords)
-     }
-     useEffect(() => {
-       getpassword()
-       let passwords = localStorage.getItem("password");
-       if(passwords){
-      console.log("passwords from local storage", passwords);
-          setPasswordArray(JSON.parse(passwords))
-     }
-     }, [])
-     const copytext =(text) =>{
-        //alert("copied to clipboard" + text)
-         navigator.clipboard.writeText(text);
-        toast.success("copied to clipboard", {
-  position: "top-right",
-  autoClose: 3000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
- progress: undefined,
-});
-       
-     };
-    const showPassword = () => {
-        passwordRef.current.type = "text"
-        if(ref.current.src.includes("src/assets/eyepassword.jpg")){
-            ref.current.src = "src/assets/eyecross.jpg"
-            passwordRef.current.type = "password"
-        }
-        else{
-            passwordRef.current.type = "text"
-           ref.current.src =  "src/assets/eyepassword.jpg" 
-        }
-    };
-    const savePassword = () => {
-  if (form.site.length > 3 && form.username.length > 3 && form.password.length > 3) {
-    const newarray = [...passwordArray, { ...form, id: uuidv4() }];
-    setPasswordArray(newarray);
-    localStorage.setItem("passwords", JSON.stringify(newarray));
-    console.log(newarray);
-    setform({ site: "", username: "", password: "" });
+const blank = { site: "", username: "", password: "" };
+const isStrong = (p) => p.length >= 10 && /[a-z]/.test(p) && /[A-Z]/.test(p) && /\d/.test(p) && /[^A-Za-z0-9]/.test(p);
 
-    toast.success("Password saved", {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  } else {
-    toast.error("Error: Password not saved. All fields must be at least 4 characters long.", {
-      position: "top-right",
-      autoClose: 3000,
-    });
-  }
-};
-const deletePassword = (id) => {
-        toast.success("password deleted", {
-  position: "bottom-right",
-  autoClose: 3000,
-  hideProgressBar: false,
-  closeOnClick: true,
-  pauseOnHover: true,
-  draggable: true,
- progress: undefined,
-});
-        console.log("Deleting password with id " , id)
-        let c= confirm("Do you really want to delete this password?")
-        if(c){
-           const newarray = (passwordArray.filter(item=>item.id!==id))
-           setPasswordArray(newarray);
-            localStorage.setItem("passwords", JSON.stringify(newarray)); 
-        }
-      //  console.log(newarray)
- }
-  const editPassword = (id) => {
-        console.log("edit password with id " , id)
-        setform(passwordArray.filter(i =>i.id === id)[0])
-       const newarray = (passwordArray.filter(item=>item.id!==id))
-        setPasswordArray(newarray);
-      //  localStorage.setItem("passwords", JSON.stringify(newarray));
-      //  console.log(newarray)
- }
-    const handlechange = (e)=>{
-       setform({...form, [e.target.name]:e.target.value})
-    }
-    return (
-        <>
-        <ToastContainer
-       position="top-right"
-        autoClose= {5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition="Bounce"
-      /> 
-      <ToastContainer />
-            <div className="absolute top-0 z-[-2] h-screen w-screen rotate-180 transform bg-green-100 bg-[radial-gradient(60%_120%_at_50%_50%,hsla(0,0%,100%,0)_0,rgba(252,205,238,.5)_100%)]">
-            </div>
-            <div className='p-2 md:px-0 md:mycontainer'>
-                <h1 className=' text-4xl text font-bold text-center'><span className='text-green-700'>&lt;</span>
-                    <span>Pass</span><span className='text-green-700'>OP/&gt;</span></h1>
-                <p className='text-green-900 text-lg text-center'>Your own password Manager</p>
-                <div className='text-black flex flex-col p-2 gap-8 items-center'>
-                    <input  value = {form.site}  onChange={handlechange} placeholder='Enter website url' className='rounded-full border border-green-500 w-full p-4 py-1' type="text" name="site" id="site" />
-                    <div className='flex w-full justify-between gap-4'>
-                        <input value = {form.username} onChange={handlechange}   placeholder='Enter username' className=' flex-[0.8] rounded-full border border-green-500 w-full p-4 py-1' type="text" name="username" id="username" />
-                        <div className="flex-[0.2] relative">
-                            <input  ref ={passwordRef} value = {form.password} onChange={handlechange}  placeholder='Enter Password' className='rounded-full border border-green-500  p-4 py-1 pr-24' type="password" name="password" id="password" />
-                             <span className='absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer' onClick = {showPassword}>
-                                 <img ref = {ref} className=' w-5 h-4' src="src/assets/eyepassword.jpg" alt="eyepassword" />
-                             </span>     
-                        </div>
-                    </div>
-                    <button onClick = {savePassword} className='flex items-center justify-center bg-green-400 hover:bg-green-300 rounded-full px-4 py-2 w-fit gap-2 border border-green-900'>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        Save password</button>
-                </div>
- 
-     <div className="passwords">
-        <h2 className='font-bold text-2xl py-4'>Your passwords</h2>
-         {passwordArray.length === 0 &&<div> No password to show </div>}
-        {passwordArray.length != 0 &&<table className='table-auto w-full rounded-md overflow-hidden mb-10'> 
-       
-  <thead className='bg-green-800 text-white'>
-    <tr>
-      <th className = 'py-2'>site</th>
-      <th className = 'py-2'>username</th>
-      <th className = 'py-2'>password</th>
-       <th className = 'py-2'>Actions</th>
-    </tr>
-  </thead >
-  <tbody className = 'bg-green-100'>
-    {passwordArray.map((item,index) =>{
-        return <tr key ={index}>
-     {/* <td className = 'flex items-center justify-center py-2 border border-white text-center w-32'><a href ={item.site} target ='_blank'>{item.site}</a>
+export default function Manager() {
+  const [form, setForm] = useState(blank), [items, setItems] = useState([]), [revealed, setRevealed] = useState({});
+  const [editing, setEditing] = useState(null), [query, setQuery] = useState(""), [loading, setLoading] = useState(true), [saving, setSaving] = useState(false), [formVisible, setFormVisible] = useState(false);
+  const load = async () => { try { setItems(await api("/passwords")); } catch (e) { toast.error(e.message); } finally { setLoading(false); } };
+  useEffect(() => { load(); }, []);
+  const visibleItems = useMemo(() => items.filter((item) => `${item.site} ${item.username}`.toLowerCase().includes(query.toLowerCase())), [items, query]);
+  const change = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const generate = () => { const characters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*_-+"; const values = crypto.getRandomValues(new Uint32Array(18)); setForm({ ...form, password: Array.from(values, (value) => characters[value % characters.length]).join("") }); setFormVisible(true); };
+  const save = async () => {
+    if (!form.site.trim() || !form.username.trim() || !form.password) return toast.error("Website, username, and password are required.");
+    setSaving(true);
+    try { await api(editing ? `/passwords/${editing}` : "/passwords", { method: editing ? "PUT" : "POST", body: JSON.stringify(form) }); toast.success(editing ? "Credential updated" : "Credential saved"); setForm(blank); setEditing(null); setFormVisible(false); await load(); }
+    catch (error) { toast.error(error.message); } finally { setSaving(false); }
+  };
+  const reveal = async (id) => {
+    if (revealed[id]) { setRevealed((current) => { const next = { ...current }; delete next[id]; return next; }); return; }
+    try { const data = await api(`/passwords/${id}/reveal`, { method: "POST" }); setRevealed((current) => ({ ...current, [id]: data.password })); } catch (error) { toast.error(error.message); }
+  };
+  const remove = async (id) => { if (!window.confirm("Delete this credential?")) return; try { await api(`/passwords/${id}`, { method: "DELETE" }); setItems((current) => current.filter((item) => item.id !== id)); toast.success("Credential deleted"); } catch (error) { toast.error(error.message); } };
+  const edit = async (item) => { try { const data = await api(`/passwords/${item.id}/reveal`, { method: "POST" }); setForm({ site: item.site, username: item.username, password: data.password }); setEditing(item.id); setFormVisible(true); window.scrollTo({ top: 0, behavior: "smooth" }); } catch (error) { toast.error(error.message); } };
+  const copy = async (text) => { try { await navigator.clipboard.writeText(text); toast.success("Copied to clipboard"); } catch { toast.error("Clipboard permission was denied."); } };
 
-      <img className='w-5 h-5'   src = "src/assets/copy-icon.svg" alt=""></img>
-      </td>*/}
-      <td className='py-2 border border-white text-center w-32'>
-  <div className="flex items-center justify-center gap-2">
-    <a href={item.site} target='_blank' rel="noopener noreferrer" className="break-all">{item.site}</a>
-    <img className='w-5 h-5 cursor-pointer' src="src/assets/copy-icon.svg" alt="copy"  onClick = {() => copytext(item.site)}/>
-  </div>
-</td>
-      <td className = 'py-2 border border-white text-center w-32'> 
-        <div className="flex items-center justify-center gap-2">
-    <a href={item.username} target='_blank' rel="noopener noreferrer" className="break-all">{item.username}</a>
-    <img className='w-5 h-5 cursor-pointer' src="src/assets/copy-icon.svg" alt="copy" onClick = {() => copytext(item.username)} />
-  </div></td>
-      <td className = 'py-2 border border-white text-center w-32'>
-         <div className="flex items-center justify-center gap-2">
-    <a href={item.password} target='_blank' rel="noopener noreferrer" className="break-all">{item.password}</a>
-    <img className='w-5 h-5 cursor-pointer' src="src/assets/copy-icon.svg" alt="copy" onClick = {() => copytext(item.password)} />
-  </div></td>
-  <td className="w-32 border border-white py-2 text-center">
-  <div className="flex justify-center space-x-2">
-    <span
-      className="cursor-pointer"
-      onClick={() => deletePassword(item.id)}
-    >
-      <img className="w-5 h-5" src="src/assets/delete-icon.svg" alt="" />
-    </span>
-    <span
-      className="cursor-pointer"
-      onClick={() => editPassword(item.id)}
-    >
-      <img className="w-5 h-5" src="src/assets/edit-pen-icon.svg" alt="" />
-    </span>
-  </div>
-</td>
-
-    </tr>
-})}
-  </tbody>
-</table> }
-     </div>
-     
-            </div>
-        </>
-    )
+  return <><ToastContainer position="top-right" autoClose={2200} /><main className="min-h-full bg-green-50 bg-[radial-gradient(circle_at_top,_rgba(134,239,172,.45),_transparent_36%)]"><div className="p-4 md:mycontainer"><header className="mb-8 text-center"><p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-green-700">Personal credential vault</p><h1 className="text-4xl font-bold text-slate-900"><span className="text-green-700">&lt;</span>Pass<span className="text-green-700">OP/&gt;</span></h1><p className="mt-2 text-slate-600">Securely organize the logins you use every day.</p></header><section className="rounded-3xl border border-white bg-white/85 p-5 shadow-xl shadow-green-950/5 backdrop-blur md:p-7"><div className="mb-5 flex items-center justify-between"><div><h2 className="text-xl font-bold text-slate-900">{editing ? "Update credential" : "Add a credential"}</h2><p className="text-sm text-slate-500">Passwords remain hidden until you reveal them.</p></div><span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">AES-256-GCM</span></div><div className="grid gap-4 md:grid-cols-2"><label className="text-sm font-semibold text-slate-700">Website or app<input value={form.site} onChange={change} placeholder="e.g. github.com" className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100" name="site" /></label><label className="text-sm font-semibold text-slate-700">Username or email<input value={form.username} onChange={change} placeholder="you@example.com" className="mt-1.5 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100" name="username" /></label></div><div className="mt-4"><label className="text-sm font-semibold text-slate-700">Website password</label><div className="mt-1.5 flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><input value={form.password} onChange={change} placeholder="Enter or generate a password" className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100" type={formVisible ? "text" : "password"} name="password" /><EyeToggle visible={formVisible} onClick={() => setFormVisible(!formVisible)} label="website password" /></div><button type="button" onClick={generate} className="rounded-xl border border-green-700 px-5 py-3 font-semibold text-green-800 transition hover:bg-green-100">Generate password</button></div>{form.password && <p className={`mt-2 text-sm ${isStrong(form.password) ? "text-green-700" : "text-amber-700"}`}>Strength: {isStrong(form.password) ? "Strong" : "Use 10+ characters with mixed types"}</p>}</div><div className="mt-5 flex flex-wrap gap-3"><button disabled={saving} onClick={save} className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white shadow-lg shadow-green-700/20 transition hover:bg-green-800 disabled:opacity-50">{saving ? "Saving..." : editing ? "Update credential" : "Save credential"}</button>{editing && <button onClick={() => { setForm(blank); setEditing(null); setFormVisible(false); }} className="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>}</div></section><section className="mt-8"><div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div><h2 className="text-2xl font-bold text-slate-900">Your passwords</h2><p className="text-sm text-slate-600">{items.length} saved credential{items.length === 1 ? "" : "s"}</p></div><input value={query} onChange={(event) => setQuery(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 outline-none focus:border-green-600 focus:ring-4 focus:ring-green-100" placeholder="Search site or username" /></div>{loading && <p className="rounded-2xl bg-white p-6 text-slate-600 shadow-sm">Loading credentials...</p>}{!loading && visibleItems.length === 0 && <p className="rounded-2xl bg-white p-8 text-center text-slate-600 shadow-sm">{items.length ? "No credentials match your search." : "Your vault is empty. Add your first credential above."}</p>}{!loading && visibleItems.length > 0 && <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm"><table className="w-full min-w-[700px]"><thead className="bg-slate-900 text-left text-sm text-white"><tr><th className="px-5 py-4">Website</th><th className="px-5 py-4">Username</th><th className="px-5 py-4">Password</th><th className="px-5 py-4 text-center">Actions</th></tr></thead><tbody>{visibleItems.map((item) => <tr className="border-t border-slate-100" key={item.id}><td className="max-w-48 break-all px-5 py-4 font-medium text-slate-800">{item.site}</td><td className="max-w-56 break-all px-5 py-4 text-slate-600"><button onClick={() => copy(item.username)} className="rounded-md hover:text-green-700">{item.username} <img className="ml-1 inline w-4" src={copyIcon} alt="Copy username" /></button></td><td className="px-5 py-4"><button onClick={() => reveal(item.id)} className="rounded-lg bg-slate-100 px-3 py-1.5 font-mono text-sm text-slate-700 hover:bg-green-100">{revealed[item.id] || "••••••••••"}</button>{revealed[item.id] && <button onClick={() => copy(revealed[item.id])} className="ml-2"><img className="inline w-4" src={copyIcon} alt="Copy revealed password" /></button>}</td><td className="px-5 py-4 text-center"><button onClick={() => edit(item)} className="rounded-lg p-2 hover:bg-green-100"><img className="w-5" src={editIcon} alt="Edit credential" /></button><button onClick={() => remove(item.id)} className="ml-2 rounded-lg p-2 hover:bg-red-50"><img className="w-5" src={deleteIcon} alt="Delete credential" /></button></td></tr>)}</tbody></table></div>}</section></div></main></>;
 }
-
-export default Manager

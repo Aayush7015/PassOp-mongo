@@ -1,6 +1,10 @@
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const loggedIn = Boolean(sessionStorage.getItem("passopToken"));
+  const logout = () => { sessionStorage.removeItem("passopToken"); navigate("/login"); };
   return (
     <nav className='bg-slate-800 text-white'>
         <div className="mycontainer flex 
@@ -17,10 +21,7 @@ const Navbar = () => {
               <a classname ='hover:font-bold' href = '#' >Contact</a>
         </li>
         </ul> */}
-        <button className='text-white bg-green-700 my-5 rounded-full flex justify-between items-center ring-white ring-1'>
-         <img  className = 'invert w-10 p-1' src = "src/assets/icons-github.svg" alt = "github logo" />
-         <span className='font-bold px-2'>Github</span>
-        </button>
+        {loggedIn && <button onClick={logout} className='text-white bg-green-700 rounded-full px-4 py-2 ring-white ring-1'>Logout</button>}
         </div>
     </nav>
   )

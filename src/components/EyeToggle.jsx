@@ -1,0 +1,5 @@
+export default function EyeToggle({ visible, onClick, label = "password" }) {
+  return <button type="button" onClick={onClick} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-green-100 hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500" aria-label={`${visible ? "Hide" : "Show"} ${label}`} title={`${visible ? "Hide" : "Show"} ${label}`}>
+    {visible ? <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 3 18 18" /><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" /><path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c5.5 0 9.3 5.1 9.8 7.9a12.6 12.6 0 0 1-3 4.7" /><path d="M6.1 6.1C3.7 7.8 2.4 10.3 2.2 12c.5 2.8 4.3 8 9.8 8 1.3 0 2.5-.3 3.6-.8" /></svg> : <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2.2 12C2.7 9.2 6.5 4 12 4s9.3 5.2 9.8 8c-.5 2.8-4.3 8-9.8 8S2.7 14.8 2.2 12Z" /><circle cx="12" cy="12" r="3" /></svg>}
+  </button>;
+}

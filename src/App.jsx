@@ -26,8 +26,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Manager from "./components/Manager";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./page/Login";
+import Register from "./page/Register";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 

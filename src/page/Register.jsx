@@ -1,95 +1,19 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../api";
+import EyeToggle from "../components/EyeToggle";
 
-const Register = () => {
-
+export default function Register() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [showPassword, setShowPassword] = useState(false), [showConfirm, setShowConfirm] = useState(false), [error, setError] = useState(""), [success, setSuccess] = useState(""), [loading, setLoading] = useState(false);
+  const change = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const submit = async (event) => {
+    event.preventDefault(); setError(""); setSuccess("");
+    if (form.password !== form.confirmPassword) return setError("Passwords do not match.");
+    setLoading(true);
+    try { const data = await api("/auth/register", { method: "POST", body: JSON.stringify({ name: form.name, email: form.email, password: form.password }) }); setSuccess(data.message); setTimeout(() => navigate("/login"), 900); }
+    catch (err) { setError(err.message); } finally { setLoading(false); }
   };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch("http://localhost:3000/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("Registration Successful");
-      navigate("/login");
-    } else {
-      alert(data.message);
-    }
-  };
-
-  return (
-    <div className="flex justify-center items-center h-screen bg-green-100">
-
-      <form
-        onSubmit={handleRegister}
-        className="bg-white p-8 rounded-xl shadow-lg w-96"
-      >
-
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Register
-        </h1>
-
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter Name"
-          className="w-full border p-3 mb-4 rounded"
-          onChange={handleChange}
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          className="w-full border p-3 mb-4 rounded"
-          onChange={handleChange}
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter Password"
-          className="w-full border p-3 mb-4 rounded"
-          onChange={handleChange}
-        />
-
-        <button className="bg-green-600 text-white w-full py-3 rounded">
-          Register
-        </button>
-
-        <p className="text-center mt-4">
-          Already have account?
-          <Link className="text-blue-500" to="/login">
-            Login
-          </Link>
-        </p>
-
-      </form>
-
-    </div>
-  );
-};
-
-export default Register;
+  return <main className="auth-background flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-10"><form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-white/70 bg-white/90 p-7 shadow-2xl shadow-green-950/10 backdrop-blur sm:p-9"><div className="mb-7 text-center"><div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-green-700 text-2xl text-white shadow-lg shadow-green-700/30">⌁</div><h1 className="text-3xl font-bold tracking-tight text-slate-900">Create your vault</h1><p className="mt-2 text-sm text-slate-600">Store your credentials in one secure place.</p></div><label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="name">Name</label><input id="name" name="name" autoComplete="name" placeholder="Your name" className="auth-input mb-4" value={form.name} onChange={change} required minLength="2" /><label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="email">Email address</label><input id="email" type="email" name="email" autoComplete="email" placeholder="you@example.com" className="auth-input mb-4" value={form.email} onChange={change} required /><label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Master password</label><div className="relative"><input id="password" type={showPassword ? "text" : "password"} name="password" autoComplete="new-password" placeholder="Create a strong password" className="auth-input pr-12" value={form.password} onChange={change} required minLength="10" /><EyeToggle visible={showPassword} onClick={() => setShowPassword(!showPassword)} label="master password" /></div><p className="mt-2 text-xs text-slate-500">10+ characters with upper/lowercase, a number, and a symbol.</p><label className="mb-2 mt-4 block text-sm font-semibold text-slate-700" htmlFor="confirmPassword">Confirm password</label><div className="relative"><input id="confirmPassword" type={showConfirm ? "text" : "password"} name="confirmPassword" autoComplete="new-password" placeholder="Repeat your password" className="auth-input pr-12" value={form.confirmPassword} onChange={change} required /><EyeToggle visible={showConfirm} onClick={() => setShowConfirm(!showConfirm)} label="confirmation password" /></div>{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700" role="alert">{error}</p>}{success && <p className="mt-4 rounded-xl bg-green-50 p-3 text-sm text-green-700" role="status">{success}</p>}<button disabled={loading} className="mt-6 w-full rounded-xl bg-green-700 py-3 font-semibold text-white shadow-lg shadow-green-700/25 transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60">{loading ? "Creating account..." : "Create account"}</button><p className="mt-6 text-center text-sm text-slate-600">Already have an account? <Link className="font-semibold text-green-700 hover:text-green-900" to="/login">Login</Link></p></form></main>;
+}

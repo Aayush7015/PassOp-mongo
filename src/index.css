@@ -3,4 +3,10 @@
   .mycontainer {
    @apply container px-4 py-16 mx-auto;
   }
+  .auth-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-green-600 focus:ring-4 focus:ring-green-100;
+  }
+  .auth-background {
+    @apply bg-green-50 bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,.25),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,.20),_transparent_35%)];
+  }
 }
